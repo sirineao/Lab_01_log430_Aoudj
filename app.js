@@ -108,6 +108,36 @@ async function searchProduct() {
     });
 }
 
+async function registerSale() {
+    console.log("-------------------------------");
+    console.log("Register a sale:");
+    const productId = parseInt(await askQuestion("Enter product ID: "));
+    const quantity = parseInt(await askQuestion("Enter quantity sold: "));
+
+    try {
+        const product = await Product.findByPk(productId);
+        if (!product) {
+            console.log("Product not found.");
+            return shopMenu();
+        }
+
+        if (product.stock_quantity < quantity) {
+            console.log("Insufficient stock for this product.");
+            return shopMenu();
+        }
+
+        const salePrice = product.price * quantity;
+        await Sale.create({ price: salePrice });
+        product.stock_quantity -= quantity;
+        await product.save();
+
+        console.log(`Sale registered successfully! Total price: $${salePrice.toFixed(2)}`);
+    } catch (error) {
+        console.error("Error registering sale:", error);
+    }
+    await shopMenu();
+}
+
 function askQuestion(query) {
   return new Promise(resolve => rl.question(query, resolve));
 }
