@@ -18,24 +18,30 @@ async function shopMenu() {
 
     rl.question("Enter your choice: ", async (choice) => {
         switch (choice) {
-            case '1':
+            case '1': {
                 await searchProduct();
                 break;
-            case '2':
+            }
+            case '2': {
                 await registerSale();
                 break;
-            case '3':
+            }
+            case '3': {
                 await cancelSale();
                 break;
-            case '4':
+            }
+            case '4': {
                 await seeProductsStock();
                 break;
-            case '5':
+            }
+            case '5': {
                 console.log("Thank you for visiting the shop!");
                 rl.close();
                 return;
-            default:
+            }
+            default: {
                 console.log("Invalid choice, please try again.");
+            }
         }
         shopMenu();
     });
@@ -52,7 +58,7 @@ async function searchProduct() {
 
     rl.question("\nEnter your choice: ", async (choice) => {
         switch (choice) {
-            case '1':
+            case '1': {
                 const id = parseInt(await askQuestion("Enter product ID: "));
                 const product = await Product.findAll({ where: { id } });
                 if (product.length > 0) {
@@ -66,7 +72,8 @@ async function searchProduct() {
                 console.log("Going back to the main menu");
                 await shopMenu();
                 return;
-            case '2':
+            }
+            case '2': {
                 const name = await askQuestion("Enter product name: ");
                 const product2 = await Product.findAll({ where: { name } });
                 if (product2.length > 0) {
@@ -80,7 +87,8 @@ async function searchProduct() {
                 console.log("Going back to the main menu");
                 await shopMenu();
                 return;
-            case '3':
+            }
+            case '3': {
                 const category = await askQuestion("Enter product category: ");
                 const product3 = await Product.findAll({ where: { category } });
                 if (product3.length > 0) {
@@ -94,15 +102,18 @@ async function searchProduct() {
                 console.log("Going back to the main menu");
                 await shopMenu();
                 return;
-            case '4':
+            }
+            case '4': {
                 console.log("Returning to main menu.");
                 await shopMenu();
                 return;
-            default:
+            }
+            default: {
                 console.log("Invalid choice, returning to menu.");
                 await shopMenu();
                 return;
-        }
+            } 
+          }
     });
 }
 
@@ -233,12 +244,5 @@ async function seeProductsStock() {
 function askQuestion(query) {
     return new Promise(resolve => rl.question(query, resolve));
 }
-
-
-(async () => {
-  await sequelize.sync();
-  console.log("Database connected!");
-  await mainMenu();
-})();
 
 shopMenu();
