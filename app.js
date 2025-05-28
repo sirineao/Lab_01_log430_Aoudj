@@ -1,7 +1,7 @@
-const readLine = require('readline');
-const { sequelize, Product, Sale } = require('./models');
+import { createInterface } from 'readline';
+import { Product, Sale } from './models';
 
-const rl = readLine.createInterface({
+const rl = createInterface({
     input: process.stdin,
     output: process.stdout
 });
