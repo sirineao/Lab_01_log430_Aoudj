@@ -2,11 +2,10 @@ const { sequelize, Product } = require('./models');
 
 (async () => {
     try {
-        // Synchronize the models with the database
         await sequelize.sync;
         console.log('Database synchronized successfully.');
 
-        // Create sample products
+       
         const products = [
             { name: 'orange', price: 1.50, category: 'Fruits', stock_quantity: 50 },
             { name: 'apple', price: 1.20, category: 'Fruits', stock_quantity: 100 },
@@ -17,9 +16,8 @@ const { sequelize, Product } = require('./models');
             { name: 'yogurt', price: 0.90, category: 'Dairy', stock_quantity: 90 },
         ];
 
-        // Insert products into the database
         await Product.bulkCreate(products);
-        console.log('Sample products created successfully.');
+        console.log('Products created successfully.');
 
     } catch (error) {
         console.error('Error populating the database:', error);

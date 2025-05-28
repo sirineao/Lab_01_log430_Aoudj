@@ -7,15 +7,14 @@ const rl = readLine.createInterface({
 });
 
 async function shopMenu() {
-    console.log("-------------------------------");
-    console.log("Welcome to the Shop!");
+    console.log("\n-------------------------------");
+    console.log("Shop Menu options:");
     console.log("1. Search for a product");
     console.log("2. Register a sale");
     console.log("3. Cancel a sale");
     console.log("4. See products stock");
     console.log("5. Exit");
     console.log("-------------------------------");
-    console.log(" ");
 
     rl.question("Enter your choice: ", async (choice) => {
         switch (choice) {
@@ -38,21 +37,20 @@ async function shopMenu() {
             default:
                 console.log("Invalid choice, please try again.");
         }
-        //shopMenu(); // Show menu again after action
+        shopMenu();
     });
 }
 
 async function searchProduct() {
-    console.log("-------------------------------");
+    console.log("\n-------------------------------");
     console.log("Search for a product:");
     console.log("1. By id");
     console.log("2. By name");
     console.log("3. By category");
     console.log("4. Back to main menu");
     console.log("-------------------------------");
-    console.log(" ");
 
-    rl.question("Enter your choice: ", async (choice) => {
+    rl.question("\nEnter your choice: ", async (choice) => {
         switch (choice) {
             case '1':
                 const id = parseInt(await askQuestion("Enter product ID: "));
@@ -65,7 +63,7 @@ async function searchProduct() {
                 } else {
                     console.log("No product found with that ID.");
                 }
-                console.log("Going back to the main menu...");
+                console.log("Going back to the main menu");
                 await shopMenu();
                 return;
             case '2':
@@ -79,7 +77,7 @@ async function searchProduct() {
                 } else {
                     console.log("No product found with that name.");
                 }
-                console.log("Going back to the main menu...");
+                console.log("Going back to the main menu");
                 await shopMenu();
                 return;
             case '3':
@@ -93,7 +91,7 @@ async function searchProduct() {
                 } else {
                     console.log("No product found with that category.");
                 }
-                console.log("Going back to the main menu...");
+                console.log("Going back to the main menu");
                 await shopMenu();
                 return;
             case '4':
@@ -109,38 +107,138 @@ async function searchProduct() {
 }
 
 async function registerSale() {
-    console.log("-------------------------------");
-    console.log("Register a sale:");
-    const productId = parseInt(await askQuestion("Enter product ID: "));
-    const quantity = parseInt(await askQuestion("Enter quantity sold: "));
+  console.log("\n-------------------------------");
+  console.log("Register a sale:");
 
-    try {
-        const product = await Product.findByPk(productId);
-        if (!product) {
-            console.log("Product not found.");
-            return shopMenu();
-        }
+  const products = await Product.findAll();
+  console.log("\nAvailable Products ");
+  products.forEach(p => {
+    console.log(`ID: ${p.id} - ${p.name} - $${p.price} (${p.stock_quantity} in stock)`);
+  });
 
-        if (product.stock_quantity < quantity) {
-            console.log("Insufficient stock for this product.");
-            return shopMenu();
-        }
+  let totalSalePrice = 0;
+  let saleProducts = []; 
+  let addingProducts = true;
 
-        const salePrice = product.price * quantity;
-        await Sale.create({ price: salePrice });
-        product.stock_quantity -= quantity;
-        await product.save();
-
-        console.log(`Sale registered successfully! Total price: $${salePrice.toFixed(2)}`);
-    } catch (error) {
-        console.error("Error registering sale:", error);
+  while (addingProducts) {
+    const productId = parseInt(await askQuestion("\nEnter product ID to add to sale or 0 to quit: "));
+    if (productId === 0) {
+      addingProducts = false;
+      break;
     }
-    await shopMenu();
+    const product = await Product.findByPk(productId);
+
+    if (!product) {
+      console.log("No product found with that ID.");
+      continue;
+    }
+
+    const quantity = parseInt(await askQuestion("Enter the quantity of the product: "));
+
+    if (product.stock_quantity < quantity) {
+      console.log("Quantity exceeds stock. Please enter a valid quantity.");
+      continue;
+    }
+
+    saleProducts.push({ product, quantity });
+    totalSalePrice += product.price * quantity;
+
+    console.log(`Added ${quantity} x ${product.name} to sale. Subtotal: $${(product.price * quantity).toFixed(2)}`);
+  }
+
+  if (saleProducts.length === 0) {
+    console.log("No products were added. Cancelling sale.");
+    return shopMenu();
+  }
+
+  console.log(totalSalePrice)
+
+  const sale = await Sale.create({ price: totalSalePrice });
+
+  for (const item of saleProducts) {
+    await sale.addProduct(item.product, { through: { quantity: item.quantity } });
+    item.product.stock_quantity -= item.quantity;
+    await item.product.save();
+  }
+
+  console.log(`Sale registered. Total price: $${totalSalePrice.toFixed(2)}`);
+  await shopMenu();
+}
+
+async function cancelSale() {
+  console.log("\n-------------------------------");
+  console.log("Cancel a sale:");
+
+  const sales = await Sale.findAll({
+    include: {
+      model: Product,
+      through: { attributes: ['quantity'] }
+    }
+  });
+
+  if (sales.length === 0) {
+    console.log("There are no sales to cancel.");
+    return shopMenu();
+  }
+
+  console.log("\nList of Sales:");
+  sales.forEach(sale => {
+    console.log(`Sale ID: ${sale.id} - Total: $${sale.price}`);
+    sale.Products.forEach(p => {
+      console.log(`  - ${p.name} (Quantity: ${p.SaleProduct.quantity})`);
+    });
+  });
+
+  const saleId = parseInt(await askQuestion("\nEnter Sale id to cancel: "));
+  const saleToCancel = await Sale.findByPk(saleId, {
+    include: {
+      model: Product,
+      through: { attributes: ['quantity'] }
+    }
+  });
+
+  if (!saleToCancel) {
+    console.log("No sale found with that id.");
+    return shopMenu();
+  }
+
+  for (const product of saleToCancel.Products) {
+    const quantity = product.SaleProduct.quantity;
+    product.stock_quantity += quantity;
+    await product.save();
+  }
+
+  await saleToCancel.destroy();
+  console.log("Sale cancelled and stock updated.");
+  console.log("Returning to main menu.");
+
+  await shopMenu();
+}
+
+async function seeProductsStock() {
+  console.log("\nStock of products:");
+  const products = await Product.findAll();
+
+  if (products.length === 0) {
+    console.log("No products in the database.");
+  } else {
+    products.forEach(p => {
+      console.log(`ID: ${p.id} - ${p.name} - $${p.price} - ${p.stock_quantity} in stock`);
+    });
+  }
+
+  await shopMenu();
 }
 
 function askQuestion(query) {
-  return new Promise(resolve => rl.question(query, resolve));
+    return new Promise(resolve => rl.question(query, resolve));
 }
 
+
+(async () => {
+  await sequelize.sync();
+  console.log("Database connected!");
+  await mainMenu();
+})();
 
 shopMenu();

@@ -8,23 +8,22 @@ const sequelize = new Sequelize('shop_db', 'sirine', 'hello1234', {
 
 const Product = require('./product.model')(sequelize, DataTypes);
 const Sale = require('./sale.model')(sequelize, DataTypes);
+const SaleProduct = require('./saleProduct')(sequelize, DataTypes);
 
-// Correct join table name
-Sale.belongsToMany(Product, { through: 'sale_products' });
-Product.belongsToMany(Sale, { through: 'sale_products' });
+Sale.belongsToMany(Product, { through: SaleProduct });
+Product.belongsToMany(Sale, { through: SaleProduct });
 
-// Export for other scripts
 module.exports = {
   sequelize,
   Product,
-  Sale
+  Sale,
+  SaleProduct
 };
 
-// Run the sync immediately if called directly
 if (require.main === module) {
   (async () => {
     await sequelize.sync({ alter: true });
-    console.log("Tables created or updated successfully!");
+    console.log("Tables created successfully!");
     await sequelize.close();
   })();
 }
