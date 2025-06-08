@@ -1,11 +1,10 @@
-const { sequelize, Product } = require('./models');
+const { sequelize, Product } = require('../models');
 
 (async () => {
     try {
-        await sequelize.sync;
+        await sequelize.sync();
         console.log('Database synchronized successfully.');
 
-       
         const products = [
             { name: 'orange', price: 1.50, category: 'Fruits', stock_quantity: 50 },
             { name: 'apple', price: 1.20, category: 'Fruits', stock_quantity: 100 },

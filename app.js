@@ -1,120 +1,120 @@
 import { createInterface } from 'readline';
-import { Product, Sale } from './models';
+import { Product, Sale } from './models/index.js';
 
 const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout
+  input: process.stdin,
+  output: process.stdout
 });
 
 async function shopMenu() {
-    console.log("\n-------------------------------");
-    console.log("Shop Menu options:");
-    console.log("1. Search for a product");
-    console.log("2. Register a sale");
-    console.log("3. Cancel a sale");
-    console.log("4. See products stock");
-    console.log("5. Exit");
-    console.log("-------------------------------");
+  console.log("\n-------------------------------");
+  console.log("Shop Menu options:");
+  console.log("1. Search for a product");
+  console.log("2. Register a sale");
+  console.log("3. Cancel a sale");
+  console.log("4. See products stock");
+  console.log("5. Exit");
+  console.log("-------------------------------");
 
-    rl.question("Enter your choice: ", async (choice) => {
-        switch (choice) {
-            case '1': {
-                await searchProduct();
-                break;
-            }
-            case '2': {
-                await registerSale();
-                break;
-            }
-            case '3': {
-                await cancelSale();
-                break;
-            }
-            case '4': {
-                await seeProductsStock();
-                break;
-            }
-            case '5': {
-                console.log("Thank you for visiting the shop!");
-                rl.close();
-                return;
-            }
-            default: {
-                console.log("Invalid choice, please try again.");
-            }
-        }
-        shopMenu();
-    });
+  rl.question("Enter your choice: ", async (choice) => {
+    switch (choice) {
+      case '1': {
+        await searchProduct();
+        break;
+      }
+      case '2': {
+        await registerSale();
+        break;
+      }
+      case '3': {
+        await cancelSale();
+        break;
+      }
+      case '4': {
+        await seeProductsStock();
+        break;
+      }
+      case '5': {
+        console.log("Thank you for visiting the shop!");
+        rl.close();
+        return;
+      }
+      default: {
+        console.log("Invalid choice, please try again.");
+      }
+    }
+    shopMenu();
+  });
 }
 
 async function searchProduct() {
-    console.log("\n-------------------------------");
-    console.log("Search for a product:");
-    console.log("1. By id");
-    console.log("2. By name");
-    console.log("3. By category");
-    console.log("4. Back to main menu");
-    console.log("-------------------------------");
+  console.log("\n-------------------------------");
+  console.log("Search for a product:");
+  console.log("1. By id");
+  console.log("2. By name");
+  console.log("3. By category");
+  console.log("4. Back to main menu");
+  console.log("-------------------------------");
 
-    rl.question("\nEnter your choice: ", async (choice) => {
-        switch (choice) {
-            case '1': {
-                const id = parseInt(await askQuestion("Enter product ID: "));
-                const product = await Product.findAll({ where: { id } });
-                if (product.length > 0) {
-                    console.log("Product found:");
-                    product.forEach(p => {
-                        console.log(`ID: ${p.id}, Name: ${p.name}, Price: ${p.price}, Stock: ${p.stock_quantity}`);
-                    });
-                } else {
-                    console.log("No product found with that ID.");
-                }
-                console.log("Going back to the main menu");
-                await shopMenu();
-                return;
-            }
-            case '2': {
-                const name = await askQuestion("Enter product name: ");
-                const product2 = await Product.findAll({ where: { name } });
-                if (product2.length > 0) {
-                    console.log("Product found:");
-                    product2.forEach(p => {
-                        console.log(`ID: ${p.id}, Name: ${p.name}, Price: ${p.price}, Stock: ${p.stock_quantity}`);
-                    });
-                } else {
-                    console.log("No product found with that name.");
-                }
-                console.log("Going back to the main menu");
-                await shopMenu();
-                return;
-            }
-            case '3': {
-                const category = await askQuestion("Enter product category: ");
-                const product3 = await Product.findAll({ where: { category } });
-                if (product3.length > 0) {
-                    console.log("Product found:");
-                    product3.forEach(p => {
-                        console.log(`ID: ${p.id}, Name: ${p.name}, Price: ${p.price}, Stock: ${p.stock_quantity}`);
-                    });
-                } else {
-                    console.log("No product found with that category.");
-                }
-                console.log("Going back to the main menu");
-                await shopMenu();
-                return;
-            }
-            case '4': {
-                console.log("Returning to main menu.");
-                await shopMenu();
-                return;
-            }
-            default: {
-                console.log("Invalid choice, returning to menu.");
-                await shopMenu();
-                return;
-            } 
-          }
-    });
+  rl.question("\nEnter your choice: ", async (choice) => {
+    switch (choice) {
+      case '1': {
+        const id = parseInt(await askQuestion("Enter product ID: "));
+        const product = await Product.findAll({ where: { id } });
+        if (product.length > 0) {
+          console.log("Product found:");
+          product.forEach(p => {
+            console.log(`ID: ${p.id}, Name: ${p.name}, Price: ${p.price}, Stock: ${p.stock_quantity}`);
+          });
+        } else {
+          console.log("No product found with that ID.");
+        }
+        console.log("Going back to the main menu");
+        await shopMenu();
+        return;
+      }
+      case '2': {
+        const name = await askQuestion("Enter product name: ");
+        const product2 = await Product.findAll({ where: { name } });
+        if (product2.length > 0) {
+          console.log("Product found:");
+          product2.forEach(p => {
+            console.log(`ID: ${p.id}, Name: ${p.name}, Price: ${p.price}, Stock: ${p.stock_quantity}`);
+          });
+        } else {
+          console.log("No product found with that name.");
+        }
+        console.log("Going back to the main menu");
+        await shopMenu();
+        return;
+      }
+      case '3': {
+        const category = await askQuestion("Enter product category: ");
+        const product3 = await Product.findAll({ where: { category } });
+        if (product3.length > 0) {
+          console.log("Product found:");
+          product3.forEach(p => {
+            console.log(`ID: ${p.id}, Name: ${p.name}, Price: ${p.price}, Stock: ${p.stock_quantity}`);
+          });
+        } else {
+          console.log("No product found with that category.");
+        }
+        console.log("Going back to the main menu");
+        await shopMenu();
+        return;
+      }
+      case '4': {
+        console.log("Returning to main menu.");
+        await shopMenu();
+        return;
+      }
+      default: {
+        console.log("Invalid choice, returning to menu.");
+        await shopMenu();
+        return;
+      }
+    }
+  });
 }
 
 async function registerSale() {
@@ -128,7 +128,7 @@ async function registerSale() {
   });
 
   let totalSalePrice = 0;
-  let saleProducts = []; 
+  let saleProducts = [];
   let addingProducts = true;
 
   while (addingProducts) {
@@ -242,7 +242,7 @@ async function seeProductsStock() {
 }
 
 function askQuestion(query) {
-    return new Promise(resolve => rl.question(query, resolve));
+  return new Promise(resolve => rl.question(query, resolve));
 }
 
 shopMenu();
